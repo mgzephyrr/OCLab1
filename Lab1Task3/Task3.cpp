@@ -142,7 +142,10 @@ int main() {
 			denominator += 2; floatIterations++; // рассчитываем знаменатель след. элемента и увеличиваем кол-во итераций
 		}
 	} // цикл приводит к денормализации очередного элемента р€да, что вызывает invalid_operation исключение
-	__except (GetExceptionCode() == EXCEPTION_FLT_INVALID_OPERATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+	__except (GetExceptionCode() == EXCEPTION_FLT_INVALID_OPERATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) { 
+		// EXCEPTION_EXECUTE_HANDLER Ч указывает на возможность данного обработчика обработать исключение.
+		// ѕри получении такого значени€ операционна€ система прекращает поиск релевантных обработчиков исключени€ и,
+		// выполнив раскрутку стека, передаЄт управление первому, вернувшему значение EXCEPTION_EXECUTE_HANDLER.		
 		printf("ѕолучилось денормализованное число во float!\n");
 	}
 	
