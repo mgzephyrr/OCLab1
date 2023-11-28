@@ -1,6 +1,10 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <stdio.h>
+#include <windows.h> 
+#include <excpt.h>
+
 
 using namespace std;
 
@@ -73,6 +77,7 @@ int input_int(int lowest = INT_MIN, int highest = INT_MAX) {
 
 int main() {
 	setlocale(LC_ALL, "Russian");
+	_control87(_EM_INVALID, _EM_DENORMAL);
 
 	int n;
 	double x, e;
@@ -131,19 +136,33 @@ int main() {
 	denominator = 1; // возвращаем значения
 	floatIterations = 0, doubleIterations = 0; // возвращаем значения
 
-	while (abs(floatNumerator / denominator) > 0) {
-		floatMaxAns += floatNumerator / denominator; // увеличиваем float сумму
-		floatNumerator *= -x * x; // рассчитываем числитель след. элемента
-		denominator += 2; floatIterations++; // рассчитываем знаменатель след. элемента и увеличиваем кол-во итераций
+	__try {
+		while (abs(floatNumerator / denominator) > 0) {
+			float number = floatNumerator / denominator;
+			floatMaxAns += number; // увеличиваем float сумму
+			floatNumerator *= -x * x; // рассчитываем числитель след. элемента
+			denominator += 2; floatIterations++; // рассчитываем знаменатель след. элемента и увеличиваем кол-во итераций
+		}
 	}
+	__except (GetExceptionCode() == EXCEPTION_FLT_INVALID_OPERATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+		printf("Получилось денормализованное число во float!\n");
+	}
+	
 
 	denominator = 1; // возвращаю значение на стартовое
 
-	while (abs(doubleNumerator / denominator) > 0) {
-		doubleMaxAns += doubleNumerator / denominator; // увеличиваем double сумму
-		doubleNumerator *= -x * x; // рассчитываем числитель след.элемента
-		denominator += 2; doubleIterations++; // рассчитываем знаменатель след.элемента и увеличиваем кол - во итераций
+	__try {
+		while (abs(doubleNumerator / denominator) > 0) {
+			double number = doubleNumerator / denominator;
+			doubleMaxAns += number; // увеличиваем double сумму
+			doubleNumerator *= -x * x; // рассчитываем числитель след.элемента
+			denominator += 2; doubleIterations++; // рассчитываем знаменатель след.элемента и увеличиваем кол - во итераций
+		}
 	}
+	__except (GetExceptionCode() == EXCEPTION_FLT_INVALID_OPERATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+		printf("Получилось денормализованное число в double!\n");
+	}
+	
 
 	printf("Значение, посчитанное до максимальной точности (кол-во итераций = %lld) (float): %.64f\n", floatIterations, floatMaxAns);
 	printf("Значение, посчитанное до максимальной точности (кол-во итераций = %lld) (double): %.64f\n\n", doubleIterations, doubleMaxAns);
