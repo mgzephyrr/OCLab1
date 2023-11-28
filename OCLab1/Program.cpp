@@ -16,12 +16,24 @@ using namespace std;
 
 int main() {
 	static signed __int8 A;
-	A = -127;
+	static signed __int16 B;
+	B = A = -125;
 	int iteration = 1;
 	while (A < 0)
 	{
 		cout << A << endl;
-		A = A - 1;
+
+		try {
+			A = A - 1;
+			B = B - 1;
+
+			if (A != B)
+				throw overflow_error("");
+		}
+		catch (overflow_error) {
+			cout << "Overflow!" << endl;
+		}
+		
 		iteration++;
 	}
 	cout << A << endl;

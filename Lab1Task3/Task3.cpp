@@ -4,18 +4,88 @@
 
 using namespace std;
 
+double input_double(double lowest = -DBL_MAX, double highest = DBL_MAX) {
+	string input;
+	bool ok = true; // переменная, отвечающая за "правильность" введенного значения
+	double number;
+
+	do {
+		cin >> input;
+		cout << endl;
+		try {
+			if (input.find_first_not_of("0123456789") != input.find_last_not_of("0123456789") ||
+				(input.find(",") == string::npos && input.find_first_not_of("0123456789") != string::npos))
+				throw invalid_argument("");
+
+			number = stod(input);
+
+			if (number < lowest or number > highest)
+				throw out_of_range("");
+
+			ok = true;
+		}
+		catch (invalid_argument) {
+			cout << "Вы ввели не число. Повторите, пожалуйста, ввод.\n";
+			ok = false;
+		}
+		catch (out_of_range) {
+			cout << "Вы ввели число, выходящее за указанные границы. Повторите, пожалуйста, ввод.\n";
+			ok = false;
+		}
+
+	} while (!ok);
+
+	return number;
+}
+
+int input_int(int lowest = INT_MIN, int highest = INT_MAX) {
+	string input;
+	bool check = true;
+	int number;
+
+	do {
+		cin >> input;
+		cout << endl;
+
+		if (input.find_first_not_of("0123456789") != string::npos) {
+			cout << "Вы ввели не число, отрицательное или дробное число, повторите, пожалуйста, ввод.\n";
+			check = false;
+		}
+		else {
+			try {
+				number = stoi(input);
+				if (number < lowest or number > highest)
+					throw out_of_range("");
+
+				else 
+					check = true;
+			}
+			catch (out_of_range) {
+				cout << "Вы ввели число, выходящее за указанные границы. Повторите, пожалуйста, ввод.\n";
+				check = false;
+			}
+		}
+
+	} while (!check);
+
+	return number;
+}
+
 int main() {
 	setlocale(LC_ALL, "Russian");
 
-	unsigned int n;
+	int n;
 	double x, e;
 
-	cout << "Введите x: ";
-	cin >> x;
-	cout << "\nВведите n: ";
-	cin >> n;
-	cout << "\nВведите epsilon: ";
-	cin >> e;
+	cout << "Введите x (дробное или целое число в пределах [0; 1]): ";
+	x = input_double(0, 1);
+
+	cout << "Введите n (целое число, в пределах от [1; 1 000 000]): ";
+	n = input_int(1, 1000000);
+
+	cout << "Введите epsilon (дробное или целое число в пределах (0; 1]): ";
+	e = input_double(DBL_MIN, 1);
+
 	cout << endl;
 
 	double funcAns = atan(x);
