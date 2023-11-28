@@ -5,7 +5,6 @@
 #include <windows.h> 
 #include <excpt.h>
 
-
 using namespace std;
 
 double input_double(double lowest = -DBL_MAX, double highest = DBL_MAX) {
@@ -77,7 +76,7 @@ int input_int(int lowest = INT_MIN, int highest = INT_MAX) {
 
 int main() {
 	setlocale(LC_ALL, "Russian");
-	_control87(_EM_INVALID, _EM_DENORMAL);
+	_control87(_EM_INVALID, _EM_DENORMAL); // демаскирует исключения, связанные с операциями с плавающей запятой (денормализация и неверная операция)
 
 	int n;
 	double x, e;
@@ -138,12 +137,11 @@ int main() {
 
 	__try {
 		while (abs(floatNumerator / denominator) > 0) {
-			float number = floatNumerator / denominator;
-			floatMaxAns += number; // увеличиваем float сумму
+			floatMaxAns += floatNumerator / denominator; // увеличиваем float сумму
 			floatNumerator *= -x * x; // рассчитываем числитель след. элемента
 			denominator += 2; floatIterations++; // рассчитываем знаменатель след. элемента и увеличиваем кол-во итераций
 		}
-	}
+	} // цикл приводит к денормализации очередного элемента ряда, что вызывает invalid_operation исключение
 	__except (GetExceptionCode() == EXCEPTION_FLT_INVALID_OPERATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
 		printf("Получилось денормализованное число во float!\n");
 	}
@@ -153,8 +151,7 @@ int main() {
 
 	__try {
 		while (abs(doubleNumerator / denominator) > 0) {
-			double number = doubleNumerator / denominator;
-			doubleMaxAns += number; // увеличиваем double сумму
+			doubleMaxAns += doubleNumerator / denominator; // увеличиваем double сумму
 			doubleNumerator *= -x * x; // рассчитываем числитель след.элемента
 			denominator += 2; doubleIterations++; // рассчитываем знаменатель след.элемента и увеличиваем кол - во итераций
 		}
