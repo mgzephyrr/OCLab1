@@ -99,12 +99,19 @@ int main() {
 	float floatNumerator = x, floatNAns = 0, floatEpsAns = 0, floatMaxAns = 0; // переменные числителя и трех сумм типа float
 	double doubleNumerator = x, doubleNAns = 0, doubleEpsAns = 0, doubleMaxAns = 0; // переменные числителя и трех сумм типа double
 	unsigned long long denominator = 1; // знаменатель (общий для обеих сумм)
-
-	for (int i = 0; i < n; i++) {
-		floatNAns += floatNumerator / denominator; // увеличиваем float сумму
-		doubleNAns += doubleNumerator / denominator; // увеличиваем double сумму
-		floatNumerator *= -x * x; doubleNumerator *= -x * x; // рассчитываем числители следующих элементов
-		denominator += 2; // рассчитываем знаменатель
+	__try {
+		for (int i = 0; i < n; i++) {
+			floatNAns += floatNumerator / denominator; // увеличиваем float сумму
+			doubleNAns += doubleNumerator / denominator; // увеличиваем double сумму
+			floatNumerator *= -x * x; doubleNumerator *= -x * x; // рассчитываем числители следующих элементов
+			denominator += 2; // рассчитываем знаменатель
+		}
+	}
+	__except (GetExceptionCode() == EXCEPTION_FLT_INVALID_OPERATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+		// EXCEPTION_EXECUTE_HANDLER — указывает на возможность данного обработчика обработать исключение.
+		// При получении такого значения операционная система прекращает поиск релевантных обработчиков исключения и,
+		// выполнив раскрутку стека, передаёт управление первому, вернувшему значение EXCEPTION_EXECUTE_HANDLER.		
+		printf("Получилось денормализованное число!\n");
 	}
 
 	printf("Значение, посчитанное с помощью %d первых элементов ряда (float): %.64f\n",n , floatNAns);
@@ -114,18 +121,31 @@ int main() {
 	denominator = 1; // возвращаю значения на начальные
 	unsigned long long floatIterations = 0, doubleIterations = 0; // переменные для подсчета кол-ва итераций
 
-	while (abs(floatNumerator / denominator) > e) {
-		floatEpsAns += floatNumerator / denominator; // увеличиваем float сумму
-		floatNumerator *= -x * x; // рассчитываем числитель след. элемента
-		denominator += 2; floatIterations++; // рассчитываем знаменатель след. элемента и увеличиваем кол-во итераций
+	__try {
+		while (abs(floatNumerator / denominator) > e) {
+			floatEpsAns += floatNumerator / denominator; // увеличиваем float сумму
+			floatNumerator *= -x * x; // рассчитываем числитель след. элемента
+			denominator += 2; floatIterations++; // рассчитываем знаменатель след. элемента и увеличиваем кол-во итераций
+		}
+	} // цикл приводит к денормализации очередного элемента ряда, что вызывает invalid_operation исключение
+	__except (GetExceptionCode() == EXCEPTION_FLT_INVALID_OPERATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+		// EXCEPTION_EXECUTE_HANDLER — указывает на возможность данного обработчика обработать исключение.
+		// При получении такого значения операционная система прекращает поиск релевантных обработчиков исключения и,
+		// выполнив раскрутку стека, передаёт управление первому, вернувшему значение EXCEPTION_EXECUTE_HANDLER.		
+		printf("Получилось денормализованное число во float!\n");
 	}
 
 	denominator = 1; // возвращаю значение на стартовое
 
-	while (abs(doubleNumerator / denominator) > e) {
-		doubleEpsAns += doubleNumerator / denominator; // увеличиваем double сумму
-		doubleNumerator *= -x * x; // рассчитываем числитель след.элемента
-		denominator += 2; doubleIterations++; // рассчитываем знаменатель след. элемента и увеличиваем кол-во итераций
+	__try {
+		while (abs(doubleNumerator / denominator) > e) {
+			doubleEpsAns += doubleNumerator / denominator; // увеличиваем double сумму
+			doubleNumerator *= -x * x; // рассчитываем числитель след.элемента
+			denominator += 2; doubleIterations++; // рассчитываем знаменатель след.элемента и увеличиваем кол - во итераций
+		}
+	}
+	__except (GetExceptionCode() == EXCEPTION_FLT_INVALID_OPERATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+		printf("Получилось денормализованное число в double!\n");
 	}
 
 	printf("Значение, посчитанное до точности epsilon = %f (кол-во итераций = %lld) (float): %.64f\n", e, floatIterations, floatEpsAns);
@@ -148,7 +168,6 @@ int main() {
 		// выполнив раскрутку стека, передаёт управление первому, вернувшему значение EXCEPTION_EXECUTE_HANDLER.		
 		printf("Получилось денормализованное число во float!\n");
 	}
-	
 
 	denominator = 1; // возвращаю значение на стартовое
 
